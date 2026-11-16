@@ -63,5 +63,5 @@ Dernière mise à jour : 16/11/2026
 | 3 | Réserver le nom de domaine (≈ 20-25 €/an 📊) | Après le point 2 |
 | 4 | Vérifier que l'activité déclarée de la micro-entreprise couvre la vente de denrées alimentaires | Phase 2 |
 | 5 | Vérifier les conditions de TikTok Shop France pour la catégorie boissons | Phase 1 |
-| 6 | Choisir le dépôt INPI : MORAX en classe 32 seule (190 €) ou classes 32 + 25 (230 €) | Phase 2 |
+| 6 | Dépôt INPI **reporté** (décision du 16/11/2026, faute de budget). Recommandation pour plus tard : MORAX en classes 32 + 25 (230 €). **D'ici là, ne pas montrer publiquement le nom MORAX ni le logo** | Dès que le budget le permet |
 | 7 | Choisir le prix public | Phase 8 |
