@@ -81,6 +81,34 @@ Elles exploitent le X, ton vrai atout distinctif :
 ## 4. Réseaux sociaux : ❓ non vérifiés
 TikTok et Instagram ne sont pas consultables depuis cette session. **À faire par toi** (5 minutes) : rechercher @drinkmorax, @morax.drinks et @moraxdrinks sur TikTok, Instagram, YouTube et Facebook. Garde le même identifiant partout.
 
+## 5. Slogans MORA + X (pré-vérifiés dans TMview le 16/11/2026)
+
+### Marques « MORA » existantes pour les boissons (classes 32 et 33), encore actives
+
+| Marque | Office | N° | Classes | Titulaire |
+|---|---|---|---|---|
+| Mora Mora | UE | 018198925 | **32**, 35 | Verhelst, Philip |
+| Mora Mora | France | 4574619 | **32**, 35, 41 | Chloé Andriamihaja |
+| MORA MORA | Italie | 2014902254177 | **32**, 33, 41, 43 | Binelli Lucio |
+| MORA MORA | Benelux | 1380573 | 33 | Mora Mora BVBA |
+| MORA | International | 1873731 | 33 (vins) | Mora Wines Limited |
+
+**Conséquences :**
+- **« MORA » seul ne doit pas devenir un nom de produit ni une marque séparée en boissons** : il y a un conflit direct avec « Mora Mora ».
+- Dans un slogan, à côté de MORAX, c'est acceptable : il raconte l'histoire du fondateur et ne sert pas à désigner le produit.
+- Pour MORAX lui-même, le risque de confusion avec « Mora Mora » paraît **faible à modéré** 💭 : le X final et la répétition de « Mora » différencient les deux marques. À faire confirmer par la recherche professionnelle.
+- « mora » compte plus de 41 000 résultats dans TMview, dont seuls les 500 premiers ont été lus. La recherche n'est donc **pas exhaustive** sur ce mot.
+
+### Pistes de slogan
+
+| Slogan | Résultat TMview (marque identique) |
+|---|---|
+| **MORA BY NAME. X BY NATURE.** | ✅ Aucune marque identique, nulle part |
+| **BORN MORA. MADE X.** | ✅ Rien dans l'UE · ⚠️ « MADE X » déposée aux États-Unis en vêtements (classe 25, 2025) : gêne possible pour l'international |
+| **ADD THE X.** | ✅ Aucune marque identique |
+| **UNLEASH THE X.** | ✅ Aucune marque identique |
+| Signature **MORA + X = MORAX** | Phrase d'histoire de marque (face arrière, site, vidéos), à ne pas déposer |
+
 ## Sources
 - TMview (EUIPO, offices nationaux dont l'INPI) : https://www.tmdn.org/tmview/ (consulté le 16/11/2026)
 - Registres RDAP : Verisign (.com), AFNIC (.fr)

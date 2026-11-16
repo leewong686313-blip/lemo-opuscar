@@ -25,7 +25,8 @@ Dernière mise à jour : 16/11/2026
 | Sujet | Décision | Statut |
 |---|---|---|
 | Nom | MORAX | ✅ Pré-vérification sans conflit en classe 32 (voir `01-VERIFICATION-MARQUE.md`). La validation professionnelle reste à faire. |
-| Slogan | « NO LIMITS. NO FEAR. » | ⛔ **À remplacer** : « NO FEAR » est une marque de l'UE enregistrée en classes 25 et 32 par un tiers. |
+| Slogan | « NO LIMITS. NO FEAR. » abandonné (« NO FEAR » est une marque de l'UE enregistrée en classes 25 et 32 par un tiers). Nouveau slogan à construire sur **MORA (pseudo du fondateur) + X** | ❓ choix en cours (voir `01-VERIFICATION-MARQUE.md` §5) |
+| Histoire de marque | MORAX = MORA + X : le pseudo du fondateur plus le X, symbole de la marque | ✅ |
 | Flexibilité | Le porteur accepte de changer de slogan et même de nom si nécessaire | ✅ |
 | Premier produit | MORAX MANGO PASSION : gazeux, sans caféine, sans sucres, canette 500 ml | ✅ |
 | Catégorie | Soda premium au style « energy », **sans aucune allégation d'énergie ou de performance** | ✅ |
@@ -56,7 +57,8 @@ Dernière mise à jour : 16/11/2026
 
 | # | Question | Quand |
 |---|---|---|
-| 1 | Nouveau slogan : choisir parmi les pistes de `01-VERIFICATION-MARQUE.md`, puis faire la recherche d'antériorité | Phase 2 |
+| 1 | Nouveau slogan MORA + X : choisir parmi les pistes pré-vérifiées (`01-VERIFICATION-MARQUE.md` §5) | Maintenant |
+| 1 bis | Ne jamais utiliser « MORA » seul comme nom de produit : des marques « Mora Mora » existent en classe 32 (UE et France) | Permanent |
 | 2 | Vérifier les comptes @drinkmorax / @morax.drinks sur TikTok et Instagram (le porteur, manuellement) | Maintenant |
 | 3 | Réserver le nom de domaine (≈ 20-25 €/an 📊) | Après le point 2 |
 | 4 | Vérifier que l'activité déclarée de la micro-entreprise couvre la vente de denrées alimentaires | Phase 2 |
