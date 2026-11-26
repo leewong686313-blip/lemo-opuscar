@@ -1,0 +1,416 @@
+<title>CUBE 60</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Manrope:wght@500;700;800&display=swap">
+<style>
+/* Layout : une vitrine de joaillier en portrait. HUD en haut, scène 3D au centre sous un projecteur, plateau de réponses en bas. */
+:root{
+  color-scheme:dark;
+  --ink:#0D0A18; --ink2:#1B1533; --plum:#3A2A63;
+  --ivory:#F6F1E7; --mute:#A9A2C0;
+  --gold:#F2C56B; --gold2:#B37A26; --rose:#F29DBE; --ice:#8FD2F5;
+  --ok:#7CE3B1; --bad:#FF6B5E;
+  --glass:rgba(255,255,255,.07); --glass2:rgba(255,255,255,.02); --line:rgba(255,255,255,.16);
+  --c:var(--gold);
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope","Helvetica Neue",Arial,sans-serif;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--ivory);font-family:var(--body);font-size:15px;overflow:hidden}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:10px;
+  padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:radial-gradient(90% 46% at 50% 42%,var(--plum) 0%,transparent 70%),linear-gradient(180deg,var(--ink2),var(--ink) 60%)}
+#gl{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+h1,h2,p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer;border:0;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:2px solid var(--ivory);outline-offset:3px}
+
+.hud{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hud>div{flex:1;min-width:0}
+.lvl b{display:block;font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+.lvl span,.sc span{font-size:12px;color:var(--mute)}
+.sc{text-align:right}
+.sc b{display:block;font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums}
+.sc b small{font-size:11px;color:var(--mute);font-weight:500}
+.timer{position:relative;flex:none!important;width:58px;height:58px;display:grid;place-items:center}
+.timer svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.timer circle{fill:none;stroke-width:3.5}
+.tr{stroke:var(--line)}.tp{stroke:var(--c);stroke-linecap:round;stroke-dasharray:119.4;filter:drop-shadow(0 0 5px var(--c))}
+.timer span{font-family:var(--display);font-size:17px;font-variant-numeric:tabular-nums}
+.timer.low .tp{stroke:var(--bad);filter:drop-shadow(0 0 6px var(--bad))}.timer.low span{color:var(--bad)}
+.bar{height:3px;border-radius:9px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--rose),var(--ice));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.q{padding-right:40px;font-family:var(--display);font-weight:500;font-size:clamp(15px,4.4vw,19px);line-height:1.25;text-wrap:balance;min-height:2.5em}
+.stage{flex:1;min-height:120px}
+.fb{min-height:2.7em;font-size:14px;line-height:1.35;color:var(--mute);text-align:center;text-wrap:balance}
+.fb b{color:var(--ivory)}.fb.ok b{color:var(--ok)}.fb.bad b{color:var(--bad)}
+.tray{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt{position:relative;height:clamp(58px,11vh,92px);border-radius:18px;border:1px solid var(--line);
+  background:linear-gradient(155deg,var(--glass),var(--glass2));box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 24px -14px #000;
+  display:grid;place-items:center;font-family:var(--display);font-size:24px;font-variant-numeric:tabular-nums;
+  transition:transform .15s,border-color .2s,background .2s;animation:rise .5s cubic-bezier(.2,.9,.2,1.2) backwards}
+.opt:nth-child(2){animation-delay:.06s}.opt:nth-child(3){animation-delay:.12s}.opt:nth-child(4){animation-delay:.18s}
+.opt:active{transform:scale(.96)}
+.opt i{position:absolute;top:7px;left:11px;font:800 11px var(--body);font-style:normal;color:var(--mute)}
+.opt svg{max-width:70%;max-height:72%}
+.sq{fill:var(--c);stroke:var(--ink);stroke-width:1.6}.gl{stroke:var(--mute);stroke-width:2;stroke-linecap:round}
+.opt.good{border-color:var(--ok);background:linear-gradient(155deg,rgba(124,227,177,.3),rgba(124,227,177,.06));animation:pop .45s}
+.opt.wrong{border-color:var(--bad);background:linear-gradient(155deg,rgba(255,107,94,.28),rgba(255,107,94,.05));animation:shake .4s}
+.opt.dim{opacity:.4}
+.opt:disabled{cursor:default}
+.foot{min-height:54px;display:grid}
+.cta{position:relative;overflow:hidden;height:54px;border-radius:99px;font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink);background:linear-gradient(180deg,#FFE7AE,var(--gold) 45%,var(--gold2));box-shadow:inset 0 1px 0 #fff8,0 14px 30px -12px var(--gold)}
+.cta::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#fffb 50%,transparent 65%);transform:translateX(-120%);animation:sheen 2.6s ease-in-out infinite}
+.cta:active{transform:scale(.97)}
+.ghost{height:46px;border-radius:99px;background:var(--glass);border:1px solid var(--line);font-weight:700}
+
+.screen{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:stretch;gap:12px;text-align:center;
+  padding-block:22px 18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:radial-gradient(90% 46% at 50% 46%,var(--plum) 0%,transparent 70%),linear-gradient(180deg,var(--ink2),var(--ink) 60%)}
+.eyebrow{font-family:var(--display);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--c)}
+.title{font-family:var(--display);font-weight:800;font-size:clamp(44px,15vw,68px);line-height:1;letter-spacing:-.01em;
+  background:linear-gradient(100deg,var(--ivory) 20%,var(--gold) 40%,#FFF3D1 50%,var(--gold) 60%,var(--ivory) 80%);background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite}
+.zone{flex:1;min-height:120px}
+.sub{font-size:16px;line-height:1.45;color:var(--mute);text-wrap:balance}.sub b{color:var(--ivory)}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(26px,8vw,36px);line-height:1.1;text-wrap:balance}
+.tip{align-self:center;max-width:34ch;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--glass);font-size:14px;line-height:1.4}
+.score{font-family:var(--display);font-weight:800;font-size:64px;line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
+.score small{font-size:22px;color:var(--mute)}
+.mute{position:absolute;z-index:4;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 84px);width:36px;height:36px;border-radius:50%;background:var(--glass);border:1px solid var(--line);font-size:15px}
+.mute.off{opacity:.45;text-decoration:line-through}
+#app:not(.home) .mute{bottom:auto;top:76px}
+@keyframes sheen{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@keyframes shine{to{background-position:-250% 0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes pop{40%{transform:scale(1.06)}}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){*,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div id="app" class="home">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <header class="hud">
+    <div class="lvl"><b id="lvlN">Niveau 1</b><span id="lvlT">Cubes cachés</span></div>
+    <div class="timer" id="timer"><svg viewBox="0 0 44 44"><circle class="tr" cx="22" cy="22" r="19"/><circle class="tp" id="ring" cx="22" cy="22" r="19"/></svg><span id="secs">60</span></div>
+    <div class="sc"><b><span id="score" style="font-size:inherit;color:inherit">0</span> <small>pts</small></b><span id="prog">01/30</span></div>
+  </header>
+  <div class="bar"><i id="barF"></i></div>
+  <h2 class="q" id="q"></h2>
+  <div class="stage" id="stage"></div>
+  <p class="fb" id="fb" aria-live="polite"></p>
+  <div class="tray" id="tray"></div>
+  <div class="foot"><button class="cta" id="next" hidden>Suivant</button></div>
+
+  <section class="screen" id="home">
+    <p class="eyebrow">30 énigmes · 3 niveaux</p>
+    <h1 class="title">CUBE 60</h1>
+    <div class="zone" id="zHome"></div>
+    <p class="sub"><b>60 secondes</b> par énigme.<br>Ton score sur 30 ?</p>
+    <p class="sub" id="best" hidden></p>
+    <button class="cta" id="play">Jouer</button>
+  </section>
+  <section class="screen" id="intro" hidden>
+    <p class="eyebrow" id="inE">Niveau 1</p>
+    <h2 class="big" id="inT">Cubes cachés</h2>
+    <div class="zone" id="zIntro"></div>
+    <p class="sub" id="inS"></p>
+    <p class="tip" id="inTip"></p>
+    <button class="cta" id="go">C'est parti</button>
+  </section>
+  <section class="screen" id="end" hidden>
+    <p class="eyebrow">Partie terminée</p>
+    <h2 class="big" id="rank">Architecte</h2>
+    <div class="zone" id="zEnd"></div>
+    <p class="score"><span id="final">0</span><small>/30</small></p>
+    <p class="sub" id="endS"></p>
+    <button class="ghost" id="copy">Copier mon score</button>
+    <button class="cta" id="again">Rejouer</button>
+  </section>
+  <button class="mute" id="mute" aria-label="Son">♪</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PI=Math.PI;
+
+/* ---------- hasard, structures, patrons ---------- */
+const R=Math.random;
+const ri=(a,b)=>a+Math.floor(R()*(b-a+1));
+const pick=a=>a[Math.floor(R()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+// Hauteurs décroissantes vers l'avant : aucune pile n'est cachée, la réponse est unique.
+function genHeights(n,m,maxH,minT,maxT){
+  for(let t=0;t<8000;t++){
+    const h=[];let tot=0,cols=0;
+    for(let x=0;x<n;x++){h.push([]);for(let y=0;y<m;y++){
+      let v;if(!x&&!y)v=maxH;else{const cap=Math.min(x?h[x-1][y]:99,y?h[x][y-1]:99);const r=R();v=Math.max(0,cap-(r<.5?0:r<.85?1:2))}
+      h[x].push(v);tot+=v;if(v)cols++}}
+    if(tot>=minT&&tot<=maxT&&cols>=Math.ceil(n*m*.6))return h;
+  }
+  return genHeights(n,m,maxH,0,999);
+}
+const norm=cs=>{const r0=Math.min(...cs.map(c=>c[0])),c0=Math.min(...cs.map(c=>c[1]));return cs.map(c=>[c[0]-r0,c[1]-c0]).sort((a,b)=>a[0]-b[0]||a[1]-b[1])};
+const TF=[c=>[c[0],c[1]],c=>[c[1],-c[0]],c=>[-c[0],-c[1]],c=>[-c[1],c[0]],c=>[c[0],-c[1]],c=>[-c[1],-c[0]],c=>[-c[0],c[1]],c=>[c[1],c[0]]];
+const canon=cs=>TF.map(f=>JSON.stringify(norm(cs.map(f)))).sort()[0];
+function hexominoes(){
+  let set=new Map([[canon([[0,0]]),[[0,0]]]]);
+  for(let k=1;k<6;k++){const nx=new Map();
+    for(const cs of set.values())for(const [r,c] of cs)for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const q=[r+dr,c+dc];if(cs.some(a=>a[0]==q[0]&&a[1]==q[1]))continue;
+      const ck=canon([...cs,q]);if(!nx.has(ck))nx.set(ck,JSON.parse(ck))}
+    set=nx}
+  return [...set.values()];
+}
+// Face du cube (0..5) recouverte par chaque case ; faces opposées : (0,1) (2,3) (4,5)
+function fold(cs){
+  const at=new Map(cs.map((c,i)=>[c[0]+','+c[1],i])),face=Array(cs.length).fill(-1),st=[[0,{U:0,D:1,N:2,S:3,E:4,W:5}]];face[0]=1;
+  while(st.length){const [i,o]=st.pop(),[r,c]=cs[i];
+    const mv=[[0,1,{...o,D:o.E,E:o.U,U:o.W,W:o.D}],[0,-1,{...o,D:o.W,W:o.U,U:o.E,E:o.D}],[-1,0,{...o,D:o.N,N:o.U,U:o.S,S:o.D}],[1,0,{...o,D:o.S,S:o.U,U:o.N,N:o.D}]];
+    for(const [dr,dc,no] of mv){const j=at.get((r+dr)+','+(c+dc));if(j===undefined||face[j]>=0)continue;face[j]=no.D;st.push([j,no])}}
+  return face;
+}
+const HEX=hexominoes(),isNet=cs=>new Set(fold(cs)).size==6;
+const NETS=HEX.filter(isNet),BAD=HEX.filter(c=>!isNet(c));
+const has22=cs=>cs.some(([r,c])=>[[0,1],[1,0],[1,1]].every(([a,b])=>cs.some(q=>q[0]==r+a&&q[1]==c+b)));
+const BAD_HARD=BAD.filter(c=>!has22(c)&&Math.max(...c.map(a=>a[0]),...c.map(a=>a[1]))<5);
+const rot=cs=>norm(cs.map(pick(TF)));
+
+const LV={1:['Cubes cachés','Compte tous les cubes, même ceux que tu ne vois pas.','Compte étage par étage, puis additionne.'],
+          2:['La bonne vue','Place-toi à la flèche : que vois-tu de face ?','Repère la pile la plus haute, puis sa position à gauche ou à droite.'],
+          3:['Le bon dépliage','Replie le patron dans ta tête.','Choisis une face comme base et replie les autres une à une.']};
+const ABCD='ABCD';
+function buildPuzzles(){
+  const P=[];
+  [[3,3,2,7,10],[3,3,3,10,14],[3,3,3,13,18],[3,4,3,14,20],[4,4,3,16,22],[4,4,4,20,27],[4,4,4,24,32],[4,5,4,26,36],[5,5,4,30,42],[5,5,5,38,52]].forEach((p,i)=>{
+    const h=genHeights(...p),tot=h.flat().reduce((a,b)=>a+b,0),layers=[];
+    for(let k=1;k<=p[2];k++)layers.push(h.flat().filter(v=>v>=k).length);
+    const set=new Set([tot]);while(set.size<4){const v=tot+pick([-1,1])*ri(1,i<5?3:4);if(v>0)set.add(v)}
+    const opts=shuffle([...set]);
+    P.push({lvl:1,type:'count',q:'Combien de cubes au total ?',h,opts,ai:opts.indexOf(tot),sol:`${layers.join(' + ')} = <b>${tot} cubes</b>`});
+  });
+  [[3,3,3],[3,3,3],[3,4,3],[4,3,3],[4,4,3],[4,4,4],[4,4,4],[4,5,4],[5,4,4],[5,5,5]].forEach((p,i)=>{
+    for(;;){
+      const [n,m,mx]=p,h=genHeights(n,m,mx,n*m,n*m*mx),dir=R()<.5?'L':'R';
+      const pr=[];for(let y=m-1;y>=0;y--)pr.push(Math.max(...h.map(r=>r[y])));
+      const pl=h.map(r=>Math.max(...r)),good=dir=='R'?pr:pl,other=(dir=='R'?pl:pr).slice().reverse();
+      const cand=[good.slice().reverse(),other];
+      for(let t=0;t<40;t++){const v=good.slice(),k=ri(0,v.length-1);v[k]+=pick([-1,1]);if(v[k]>=1&&v[k]<=mx)cand.push(v)}
+      const seen=new Set([good.join()]),o=[];
+      for(const c of cand){if(o.length==3)break;if(seen.has(c.join()))continue;seen.add(c.join());o.push(c)}
+      if(o.length<3||new Set(good).size<2)continue;
+      const opts=shuffle([good,...o]),ai=opts.indexOf(good);
+      P.push({lvl:2,type:'view',q:'Quelle vue obtient-on depuis la flèche ?',h,dir,mx,opts,ai,sol:`Depuis la flèche, on voit la <b>vue ${ABCD[ai]}</b>`});break;
+    }
+  });
+  for(let i=0;i<10;i++){
+    if(i<4){const good=rot(pick(NETS)),opts=shuffle([good,...shuffle(i<2?BAD:BAD_HARD).slice(0,3).map(rot)]),ai=opts.indexOf(good);
+      P.push({lvl:3,type:'fold',q:'Quel patron se replie en cube ?',opts,ai,sol:`Seul le <b>patron ${ABCD[ai]}</b> se referme en cube`});}
+    else if(i<7){const bad=rot(pick(BAD_HARD)),opts=shuffle([bad,...shuffle(NETS).slice(0,3).map(rot)]),ai=opts.indexOf(bad);
+      P.push({lvl:3,type:'notfold',q:'Quel patron ne forme PAS un cube ?',opts,ai,sol:`Le <b>patron ${ABCD[ai]}</b> superpose deux faces, en rouge`});}
+    else{const net=rot(pick(NETS)),f=fold(net),L6=shuffle([...'ABCDEF']),k=ri(0,5),j=f.indexOf(f[k]^1);
+      const opts=shuffle([L6[j],...shuffle(L6.filter((_,x)=>x!=j&&x!=k)).slice(0,3)]);
+      P.push({lvl:3,type:'opp',q:`Cube replié : quelle face est opposée à ${L6[k]} ?`,net,letters:L6,k,j,opts,ai:opts.indexOf(L6[j]),sol:`<b>${L6[j]}</b> est en face de ${L6[k]}`});}
+  }
+  return P;
+}
+const viewSVG=(prof,mx)=>{const c=14;let o='';prof.forEach((v,i)=>{for(let z=0;z<v;z++)o+=`<rect class="sq" x="${i*c}" y="${(mx-1-z)*c}" width="${c}" height="${c}"/>`});
+  return `<svg viewBox="-5 -3 ${prof.length*c+10} ${mx*c+7}">${o}<line class="gl" x1="-3" y1="${mx*c+1}" x2="${prof.length*c+3}" y2="${mx*c+1}"/></svg>`};
+const netSVG=cs=>{const c=16,w=Math.max(...cs.map(a=>a[1]))+1,h=Math.max(...cs.map(a=>a[0]))+1;
+  return `<svg viewBox="-2 -2 ${w*c+4} ${h*c+4}">${cs.map(a=>`<rect class="sq" x="${a[1]*c}" y="${a[0]*c}" width="${c}" height="${c}"/>`).join('')}</svg>`};
+
+/* ---------- son ---------- */
+let ac,muted=false;
+function beep(f,d,type,v,when){if(muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime+(when||0),o=ac.createOscillator(),g=ac.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.07,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const sfx={tap:()=>beep(520,.07,'triangle',.05),ok:()=>[660,880,1320].forEach((f,i)=>beep(f,.22,'sine',.07,i*.08)),bad:()=>{beep(170,.25,'sawtooth',.05);beep(120,.3,'sawtooth',.05,.1)},
+  tick:()=>beep(1000,.04,'square',.025),land:()=>beep(ri(180,260),.06,'triangle',.03),whoosh:()=>beep(300,.3,'sine',.03)};
+
+/* ---------- scène 3D ---------- */
+const app=$('app'),canvas=$('gl');
+let renderer,scene,camera,world,geoCube,ped,ok3d=true;
+const cam={az:PI/4,el:.615,r:3,ty:1,fov:30,sway:1,spin:0};
+const MAT={};
+try{
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(30,1,.1,200);
+  // Studio : boîtes lumineuses reflétées par le vernis des cubes
+  const env=new THREE.Scene(),bg=new THREE.BoxGeometry(1,1,1);
+  const room=new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:0x17112b,side:THREE.BackSide}));room.scale.set(30,30,30);env.add(room);
+  [[0xffffff,0,10,0,9,.2,9],[0xffe2b0,10,4,3,.2,7,7],[0xff8fc0,-10,3,-3,.2,6,4],[0x86d4ff,-2,3,-10,7,5,.2],[0xffffff,4,2,10,2.5,9,.2],[0xffd27a,-9,7,8,3,3,.2]]
+    .forEach(([c,x,y,z,a,b,d])=>{const m=new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:c}));m.position.set(x,y,z);m.scale.set(a,b,d);env.add(m)});
+  const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(env,.03).texture;pm.dispose();
+  scene.add(new THREE.HemisphereLight(0xfff1dd,0x2a1f4a,.3));
+  const key=new THREE.DirectionalLight(0xffffff,1.1);key.position.set(5,11,4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);
+  Object.assign(key.shadow.camera,{left:-9,right:9,top:9,bottom:-9,near:1,far:30});key.shadow.radius=6;key.shadow.bias=-.0005;scene.add(key);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.ShadowMaterial({opacity:.5}));ground.rotation.x=-PI/2;ground.position.y=-.1;ground.receiveShadow=true;scene.add(ground);
+  world=new THREE.Group();scene.add(world);
+  const a=.4,r=.07,sh=new THREE.Shape();
+  sh.moveTo(-a+r,-a);sh.lineTo(a-r,-a);sh.quadraticCurveTo(a,-a,a,-a+r);sh.lineTo(a,a-r);sh.quadraticCurveTo(a,a,a-r,a);sh.lineTo(-a+r,a);sh.quadraticCurveTo(-a,a,-a,a-r);sh.lineTo(-a,-a+r);sh.quadraticCurveTo(-a,-a,-a+r,-a);
+  geoCube=new THREE.ExtrudeGeometry(sh,{depth:.8,bevelEnabled:true,bevelThickness:.08,bevelSize:.08,bevelSegments:4,curveSegments:6});geoCube.translate(0,0,-.4);
+  const phys=(color,o)=>{const m=new THREE.MeshPhysicalMaterial(Object.assign({color,metalness:.82,roughness:.2,clearcoat:1,clearcoatRoughness:.04,envMapIntensity:1.9},o));m.color.convertSRGBToLinear();return m};
+  MAT[1]=phys(0xF0B23A);MAT[2]=phys(0xF2709F);MAT[3]=phys(0x4FB4F0);MAT.bad=phys(0xFF3B30,{metalness:.5});MAT.arrow=phys(0xFF3B30,{metalness:.3,emissive:0x8a1208});
+  ped=new THREE.Group();const disc=new THREE.Mesh(new THREE.CylinderGeometry(1,1,.1,72),phys(0x1C1536,{metalness:.9,roughness:.28,envMapIntensity:1.2}));disc.position.y=-.05;disc.receiveShadow=true;
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(1,.012,8,96),phys(0xF0B23A));rim.rotation.x=PI/2;ped.add(disc,rim);scene.add(ped);
+}catch(e){ok3d=false;canvas.hidden=true}
+
+const tweens=[];
+const eo=k=>1-Math.pow(1-k,3),eio=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2,back=k=>{const c=1.70158;return 1+(c+1)*Math.pow(k-1,3)+c*Math.pow(k-1,2)};
+function tw(dur,fn,o){o=o||{};tweens.push({t:-(o.delay||0),dur:RM?.001:dur,fn,ease:o.ease||eo,done:o.done})}
+function to(obj,props,dur,o){const s={};for(const k in props)s[k]=obj[k];tw(dur,e=>{for(const k in props)obj[k]=s[k]+(props[k]-s[k])*e},o)}
+function clearWorld(){tweens.length=0;if(!ok3d)return;while(world.children.length)world.remove(world.children[0]);world.rotation.set(0,0,0);parts.forEach(m=>scene.remove(m));parts.length=0;live={}}
+function setPed(r){if(ok3d){ped.scale.set(r,1,r)}}
+let live={};
+const parts=[];
+function burst(mat,n,y){if(!ok3d||RM)return;for(let i=0;i<n;i++){const m=new THREE.Mesh(geoCube,mat);m.scale.setScalar(.2+R()*.16);m.position.set((R()-.5)*1.5,y,(R()-.5)*1.5);
+  m.userData={v:[(R()-.5)*5,4+R()*5,(R()-.5)*5],life:1.3,w:[R()*8,R()*8]};scene.add(m);parts.push(m)}}
+
+function buildStructure(h,mat,drop){
+  const n=h.length,m=h[0].length,g=new THREE.Group(),cubes=[];let H=0;
+  for(let x=0;x<n;x++)for(let y=0;y<m;y++)for(let z=0;z<h[x][y];z++){
+    const c=new THREE.Mesh(geoCube,mat);c.castShadow=c.receiveShadow=true;c.position.set(x-n/2+.5,z+.5,y-m/2+.5);c.userData={z,ord:z*3+x+y};g.add(c);cubes.push(c);H=Math.max(H,z+1)}
+  if(drop){cubes.forEach(c=>{const y0=c.position.y;c.position.y=y0+7;c.scale.setScalar(.001);
+    tw(.55,e=>{c.position.y=y0+7*(1-e);c.scale.setScalar(Math.min(1,e*1.6))},{delay:.15+c.userData.ord*.045,ease:back})});
+    if(!RM)for(let i=0;i<5;i++)setTimeout(sfx.land,250+i*130)}
+  return {g,cubes,n,m,H,r:.5*Math.hypot(n,m,H)};
+}
+function buildArrow(dir,n,m){
+  const g=new THREE.Group(),L=dir=='R'?n:m;
+  const sh=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,1,20),MAT.arrow);sh.rotation.z=PI/2;sh.position.set(L/2+1.95,.2,0);
+  const co=new THREE.Mesh(new THREE.ConeGeometry(.42,.75,28),MAT.arrow);co.rotation.z=PI/2;co.position.set(L/2+1.1,.2,0);
+  sh.castShadow=co.castShadow=true;g.add(sh,co);if(dir=='L')g.rotation.y=-PI/2;return g;
+}
+function tileMat(base,letter){
+  if(!letter)return base;
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+  x.fillStyle='#'+base.color.clone().convertLinearToSRGB().getHexString();x.fillRect(0,0,128,128);
+  x.fillStyle='#120e24';x.font='900 84px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(letter,64,70);
+  const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;const m=base.clone();m.color.set(0xffffff);m.map=t;return m;
+}
+// Patron articulé : chaque case pivote sur l'arête partagée avec sa case parente.
+function buildNet(cells,base,letters){
+  const geo=new THREE.BoxGeometry(.95,.07,.95),at=new Map(cells.map((c,i)=>[c[0]+','+c[1],i]));
+  let root=0,best=-1;cells.forEach((c,i)=>{const k=[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>at.has((c[0]+d[0])+','+(c[1]+d[1]))).length;if(k>best){best=k;root=i}});
+  const tiles=[],hinges=[],mk=i=>{const node=new THREE.Group(),mt=tileMat(base,letters&&letters[i]),side=base;
+    const mesh=new THREE.Mesh(geo,letters?[side,side,mt,mt,side,side]:base);mesh.castShadow=mesh.receiveShadow=true;node.add(mesh);tiles[i]=mesh;return node};
+  const rootNode=mk(root),seen=new Set([root]),q=[[root,rootNode]];
+  while(q.length){const [i,node]=q.shift(),[r,c]=cells[i];
+    for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){const j=at.get((r+dr)+','+(c+dc));if(j===undefined||seen.has(j))continue;seen.add(j);
+      const hg=new THREE.Group();hg.position.set(dc*.5,0,dr*.5);const ch=mk(j);ch.position.set(dc*.5,0,dr*.5);hg.add(ch);node.add(hg);
+      hinges.push(dc?{o:hg,ax:'z',s:-dc}:{o:hg,ax:'x',s:dr});q.push([j,ch])}}
+  const cx=(Math.max(...cells.map(a=>a[1])))/2,cz=(Math.max(...cells.map(a=>a[0])))/2;
+  const holder=new THREE.Group();holder.position.y=.55;holder.add(rootNode);
+  const flat=[cells[root][1]-cx,-.5,cells[root][0]-cz];rootNode.position.set(...flat);
+  const net={holder,rootNode,tiles,flat,t:0,r:.5*Math.hypot(cx*2+1,cz*2+1)+.2,
+    set(t){net.t=t;hinges.forEach(h=>h.o.rotation[h.ax]=h.s*PI/2*t);rootNode.position.set(flat[0]*(1-t),-.5+t,flat[2]*(1-t))}};
+  return net;
+}
+
+/* ---------- mises en scène ---------- */
+let zone=$('zHome');
+function sceneHero(){clearWorld();if(!ok3d)return;const s=buildStructure(genHeights(4,4,4,22,28),MAT[1],true);world.add(s.g);setPed(3.6);Object.assign(cam,{az:PI/4,el:.615,r:s.r+.4,ty:s.H/2,fov:30,sway:0,spin:.35})}
+function sceneIntro(l){clearWorld();if(!ok3d)return;setPed(l==2?3.6:2.8);
+  if(l<3){const s=buildStructure(genHeights(3,3,3,12,16),MAT[l],true);world.add(s.g);if(l==2){const a=buildArrow('R',3,3);world.add(a)}
+    Object.assign(cam,{az:PI/4,el:.615,r:l==2?s.r+1.2:s.r,ty:s.H/2,fov:30,sway:0,spin:.4})}
+  else{const net=buildNet(NETS[ri(0,NETS.length-1)],MAT[3]);world.add(net.holder);live.loop=net;Object.assign(cam,{az:PI/4,el:.8,r:net.r,ty:.55,fov:30,sway:0,spin:.5})}}
+function scenePuzzle(p){clearWorld();if(!ok3d)return;
+  Object.assign(cam,{az:PI/4,el:.615,fov:30,sway:RM?0:1,spin:0});
+  if(p.type=='count'||p.type=='view'){const s=buildStructure(p.h,MAT[p.lvl],true);world.add(s.g);live.s=s;cam.r=s.r+.3;cam.ty=s.H/2;setPed(.5*Math.hypot(s.n,s.m)+(p.type=='view'?2.6:.8));
+    if(p.type=='view'){const a=buildArrow(p.dir,s.n,s.m);world.add(a);a.scale.setScalar(.001);tw(.5,e=>a.scale.setScalar(Math.max(.001,e)),{delay:.9,ease:back});cam.r=.5*Math.hypot(s.n+3.4,s.m+3.4,s.H);cam.sway=RM?0:.6}}
+  else if(p.type=='opp'){const net=buildNet(p.net,MAT[3],p.letters);world.add(net.holder);live.net=net;setPed(net.r+.5);net.holder.scale.setScalar(.001);tw(.6,e=>net.holder.scale.setScalar(Math.max(.001,e)),{ease:back});
+    Object.assign(cam,{el:1.0,r:net.r,ty:.1,sway:RM?0:.5})}
+  else{const c=new THREE.Mesh(geoCube,MAT[3]);c.castShadow=true;c.scale.setScalar(.001);c.position.y=.95;world.add(c);live.idle=c;setPed(1.9);tw(.7,e=>c.scale.setScalar(Math.max(.001,1.5*e)),{ease:back});
+    Object.assign(cam,{r:1.7,ty:.9,sway:0,spin:.9})}
+}
+function reveal(p,good){
+  if(!ok3d)return;sfx.whoosh();
+  if(p.type=='count'){live.s.cubes.forEach(c=>to(c.position,{y:c.position.y+c.userData.z*.6},.8,{ease:eio,delay:.1}));to(cam,{r:cam.r*1.22,ty:cam.ty+(live.s.H-1)*.3},.8,{ease:eio})}
+  else if(p.type=='view'){to(cam,{az:p.dir=='R'?0:PI/2,el:.03,sway:0,fov:13,ty:live.s.H/2},1.1,{ease:eio})}
+  else if(p.type=='opp'){const n=live.net;[p.k,p.j].forEach(i=>{const mm=tileMat(MAT[1],p.letters[i]);n.tiles[i].material=[MAT[1],MAT[1],mm,mm,MAT[1],MAT[1]]});
+    tw(1.3,e=>n.set(e),{ease:eio,delay:.2});to(cam,{el:.5,r:1.25,ty:.55,sway:0,spin:1.1},1.3,{ease:eio,delay:.2});to(ped.scale,{x:1.5,z:1.5},1.3,{ease:eio,delay:.2})}
+  else{const c=live.idle;tw(.3,e=>c.scale.setScalar(Math.max(.001,1.5*(1-e))),{done:()=>world.remove(c)});
+    const cells=p.opts[p.ai],n=buildNet(cells,MAT[3]);n.holder.scale.setScalar(.001);world.add(n.holder);world.rotation.set(0,0,0);
+    Object.assign(cam,{spin:0});to(cam,{el:.95,r:n.r,ty:.3},.4);setPed(n.r+.5);
+    tw(.45,e=>n.holder.scale.setScalar(Math.max(.001,e)),{delay:.25,ease:back});
+    tw(1.3,e=>n.set(e),{ease:eio,delay:.95,done:()=>{if(p.type=='notfold'){const f=fold(cells),cnt={};f.forEach(v=>cnt[v]=(cnt[v]||0)+1);f.forEach((v,i)=>{if(cnt[v]>1)n.tiles[i].material=MAT.bad})}cam.spin=1}});
+    to(cam,{el:.5,r:1.25,ty:.55},1.3,{ease:eio,delay:.95});to(ped.scale,{x:1.5,z:1.5},1.3,{ease:eio,delay:.95})}
+  if(good)setTimeout(()=>burst(MAT[p.lvl],16,cam.ty+.5),250);
+}
+
+/* ---------- boucle ---------- */
+let last=performance.now(),T=0,spinA=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
+  for(let i=tweens.length-1;i>=0;i--){const w=tweens[i];w.t+=dt;if(w.t<0)continue;const k=Math.min(1,w.t/w.dur);w.fn(w.ease(k));if(k>=1){tweens.splice(i,1);w.done&&w.done()}}
+  tick(dt);
+  if(ok3d){
+    if(live.loop)live.loop.set(RM?1:.5-.5*Math.cos(T*1.3));
+    spinA+=dt*cam.spin*(RM?0:1);world.rotation.y=(cam.spin?spinA:0)+Math.sin(T*.6)*.15*cam.sway;if(!cam.spin)spinA=0;
+    for(let i=parts.length-1;i>=0;i--){const m=parts[i],u=m.userData;u.v[1]-=14*dt;m.position.x+=u.v[0]*dt;m.position.y+=u.v[1]*dt;m.position.z+=u.v[2]*dt;m.rotation.x+=u.w[0]*dt;m.rotation.y+=u.w[1]*dt;u.life-=dt;
+      if(u.life<.4)m.scale.multiplyScalar(.9);if(u.life<=0){scene.remove(m);parts.splice(i,1)}}
+    const W=app.clientWidth,H=app.clientHeight;
+    if(canvas.width!==Math.round(W*renderer.getPixelRatio())||canvas.height!==Math.round(H*renderer.getPixelRatio()))renderer.setSize(W,H,false);
+    const a=app.getBoundingClientRect(),z=zone.getBoundingClientRect(),w=Math.max(1,z.width),h=Math.max(1,z.height);
+    renderer.setViewport(z.left-a.left,H-(z.top-a.top)-h,w,h);
+    camera.fov=cam.fov;camera.aspect=w/h;const vf=cam.fov*PI/180,hf=2*Math.atan(Math.tan(vf/2)*camera.aspect),d=cam.r*1.15/Math.sin(Math.min(vf,hf)/2);
+    camera.position.set(Math.cos(cam.el)*Math.cos(cam.az)*d,cam.ty+Math.sin(cam.el)*d,Math.cos(cam.el)*Math.sin(cam.az)*d);camera.lookAt(0,cam.ty,0);camera.updateProjectionMatrix();
+    renderer.render(scene,camera);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- partie ---------- */
+let puzzles=[],idx=0,score=0,state='home',left=60,lastSec=60,best=0;
+try{best=+localStorage.getItem('cube60.best')||0}catch(e){}
+function showBest(){if(best){$('best').hidden=false;$('best').innerHTML=`Ton record : <b>${best}/30</b>`}}
+function show(id){['home','intro','end'].forEach(s=>$(s).hidden=s!==id);app.classList.toggle('home',id==='home')}
+function setLevel(l){app.style.setProperty('--c',`var(--${['gold','rose','ice'][l-1]})`)}
+function intro(l){state='intro';setLevel(l);show('intro');zone=$('zIntro');$('inE').textContent='Niveau '+l;$('inT').textContent=LV[l][0];$('inS').textContent=LV[l][1];$('inTip').innerHTML='<b>Astuce.</b> '+LV[l][2];sceneIntro(l)}
+function load(){
+  const p=puzzles[idx];state='play';left=60;lastSec=60;show(null);zone=$('stage');setLevel(p.lvl);
+  $('lvlN').textContent='Niveau '+p.lvl;$('lvlT').textContent=LV[p.lvl][0];$('prog').textContent=String(idx+1).padStart(2,'0')+'/30';$('barF').style.width=(idx/30*100)+'%';
+  $('q').textContent=p.q;$('fb').className='fb';$('fb').innerHTML=ok3d?'':'Affichage 3D indisponible sur cet appareil.';$('next').hidden=true;
+  $('tray').innerHTML=p.opts.map((o,i)=>`<button class="opt" id="opt${i}" data-i="${i}">${p.type=='count'||p.type=='opp'?o:`<i>${ABCD[i]}</i>`+(p.type=='view'?viewSVG(o,p.mx):netSVG(o))}</button>`).join('');
+  scenePuzzle(p);drawTimer();
+}
+function drawTimer(){const s=Math.max(0,Math.ceil(left));$('secs').textContent=s;$('ring').style.strokeDashoffset=119.4*(1-Math.max(0,left)/60);$('timer').classList.toggle('low',left<=10);
+  if(s!==lastSec){lastSec=s;if(s<=5&&s>0)sfx.tick()}}
+function tick(dt){if(state!=='play'||document.hidden)return;left-=dt;drawTimer();if(left<=0)answer(-1)}
+function answer(i){
+  if(state!=='play')return;state='done';const p=puzzles[idx],good=i===p.ai;
+  [...$('tray').children].forEach((b,k)=>{b.disabled=true;b.classList.add(k===p.ai?'good':k===i?'wrong':'dim')});
+  if(good){score++;$('score').textContent=score;sfx.ok()}else sfx.bad();
+  $('fb').className='fb '+(good?'ok':'bad');$('fb').innerHTML=(i<0?'Temps écoulé. ':good?'Exact. ':'Raté. ')+p.sol+'.';
+  $('barF').style.width=((idx+1)/30*100)+'%';
+  reveal(p,good);$('next').hidden=false;$('next').textContent=idx===29?'Voir mon score':'Suivant';
+}
+function next(){idx++;if(idx>=30)return end();if(idx%10===0)return intro(puzzles[idx].lvl);load()}
+function end(){
+  state='end';setLevel(1);show('end');zone=$('zEnd');sceneHero();
+  const rk=score>=25?'Maître du cube':score>=18?'Architecte':score>=10?'Bâtisseur':'Apprenti';$('rank').textContent=rk;
+  const rec=score>best;if(rec){best=score;try{localStorage.setItem('cube60.best',best)}catch(e){}}
+  $('endS').innerHTML=rec?'Nouveau record. Défie un ami avec <b>#Cube60</b>.':`Ton record reste <b>${best}/30</b>. Retente ta chance.`;
+  const f=$('final');if(RM)f.textContent=score;else{const o={v:0};tw(1.2,e=>f.textContent=Math.round(score*e),{delay:.3})}
+  $('copy').textContent='Copier mon score';if(score>=10)setTimeout(()=>burst(MAT[1],24,2),500);
+}
+function start(){sfx.tap();puzzles=buildPuzzles();idx=0;score=0;$('score').textContent='0';intro(1)}
+
+$('play').onclick=start;$('again').onclick=start;
+$('go').onclick=()=>{sfx.tap();load()};
+$('next').onclick=()=>{sfx.tap();next()};
+$('tray').onclick=e=>{const b=e.target.closest('.opt');if(b)answer(+b.dataset.i)};
+$('mute').onclick=()=>{muted=!muted;$('mute').classList.toggle('off',muted)};
+$('copy').onclick=()=>{const t=`J'ai fait ${score}/30 à CUBE 60 (${$('rank').textContent}). Tu fais mieux ? #Cube60`;
+  const done=()=>$('copy').textContent='Score copié';
+  try{navigator.clipboard.writeText(t).then(done,()=>{$('copy').textContent=t})}catch(e){$('copy').textContent=t}};
+showBest();sceneHero();requestAnimationFrame(frame);
+})();
+</script>
